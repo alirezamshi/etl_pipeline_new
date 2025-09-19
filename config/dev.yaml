@@ -1,0 +1,89 @@
+# Development Environment Configuration
+environment: dev
+
+# Data Source Configuration
+source:
+  type: csv
+  path: sample_sales_data.csv
+  encoding: utf-8
+  separator: ","
+  header: 0
+
+# Data Transformation Configuration
+transform:
+  type: cleaner
+  remove_duplicates: true
+  dedup_cols: ["order_id"]
+  missing_strategy: fill
+  fill_values:
+    customer_name: "Unknown Customer"
+    product_category: "Uncategorized"
+  filter_expr: "order_amount > 0"
+  standardize_columns: true
+  dtype_conversions:
+    order_amount: float64
+    order_date: datetime64[ns]
+  remove_outliers: true
+  outlier_cols: ["order_amount"]
+
+# Data Loading Configuration
+load:
+  type: csv
+  path: cleaned_sales_data.csv
+  include_index: false
+  include_header: true
+  overwrite: true
+
+# Analytics Configuration
+analytics:
+  enabled: true
+  inspection:
+    sample_size: 10
+    include_correlations: true
+    include_duplicates: true
+    include_outliers: true
+  quality:
+    quality_rules:
+      completeness:
+        enabled: true
+        max_null_percentage: 5.0
+        required_columns: ["order_id", "customer_name", "order_amount"]
+      uniqueness:
+        enabled: true
+        max_duplicate_percentage: 1.0
+        unique_columns: ["order_id"]
+      validity:
+        enabled: true
+        column_rules:
+          order_amount:
+            type: float
+            min_value: 0
+            max_value: 100000
+          order_date:
+            type: datetime
+          product_category:
+            allowed_values: ["Electronics", "Clothing", "Books", "Home", "Sports", "Uncategorized"]
+      consistency:
+        enabled: true
+        cross_column_rules:
+          - name: "Order amount consistency"
+            columns: ["order_amount", "quantity", "unit_price"]
+            condition: "order_amount == quantity * unit_price"
+      accuracy:
+        enabled: true
+        business_rules:
+          - name: "Valid order dates"
+            condition: "order_date >= '2020-01-01' and order_date <= '2024-12-31'"
+          - name: "Reasonable quantities"
+            condition: "quantity >= 1 and quantity <= 1000"
+  reporting:
+    dataset_name: "Sales Data - Development"
+    output_path: "output_data/sales_data_report.json"
+  save_report: true
+
+# Intermediate Data Configuration
+intermediates:
+  extract: "intermediate_data/extracted_data.parquet"
+  transform: "intermediate_data/transformed_data.parquet"
+  cleanup: true
+  persist_steps: ["extract", "transform"]
