@@ -2,6 +2,10 @@
 
 A robust, scalable ETL and data workflow pipeline supporting multiple platforms including local CSVs, S3, Databricks, and Neo4j. Built with modularity, maintainability, and production resilience in mind.
 
+## 🚀 Quick Start
+
+**Note**: The GitHub Actions workflow file (`.github/workflows/ci.yml`) is included in the repository but may require a GitHub token with `workflow` scope to be pushed via API. You can manually add this file through the GitHub web interface if needed.
+
 ## 🏗️ Architecture
 
 This pipeline follows modern data engineering best practices inspired by:
